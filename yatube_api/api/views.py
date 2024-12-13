@@ -22,10 +22,11 @@ class PostViewSet(viewsets.ModelViewSet):
         super(PostViewSet, self).perform_update(serializer)
 
     def perform_destroy(self, instance):
-        # Проверка на авторство перед удалением
+        # Проверка, что только автор комментария может его удалить
         if instance.author != self.request.user:
-            raise PermissionDenied('Удаление чужого контента запрещено!')
-        super(PostViewSet, self).perform_destroy(instance)
+            raise PermissionDenied('Вы не можете удалить чужой комментарий.')
+        # Если пользователь — автор, выполняем удаление
+        instance.delete()
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
@@ -50,7 +51,9 @@ class CommentViewSet(viewsets.ModelViewSet):
             raise PermissionDenied('Изменение чужого контента запрещено!')
         super(CommentViewSet, self).perform_update(serializer)
 
-    def perform_destroy(self, serializer):
-        if serializer.instance.author != self.request.user:
-            raise PermissionDenied('Изменение чужого контента запрещено!')
-        super(CommentViewSet, self).perform_destroy(serializer)
+    def perform_destroy(self, instance):
+        # Проверка, что только автор комментария может его удалить
+        if instance.author != self.request.user:
+            raise PermissionDenied('Вы не можете удалить чужой комментарий.')
+        # Если пользователь — автор, выполняем удаление
+        instance.delete()
